@@ -1,0 +1,25 @@
+node('built-in')
+{
+   stage('ContinuosDownload') 
+   {
+   git 'https://github.com/intelliqittrainings/maven.git'
+   }
+   stage('Continuos Build')
+   {
+       sh 'mvn package'
+   }
+   stage('Continous Deployment')
+{
+    deploy adapters: [tomcat9(credentialsId: '3f4613df-55e0-4b5d-b243-dc851e813259', path: '', url: 'http://172.31.19.215:8080')], contextPath: 'testapp', war: '**/*.war'
+}
+stage('Continuos Testing')
+{
+    git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+    sh 'java -jar /home/ubuntu/.jenkins/workspace/Scriptedpipeline/testing.jar'
+}
+stage('Continuos Delivery')
+{
+    input message: 'Need Approval from the DM', submitter: 'Arjun'
+    deploy adapters: [tomcat9(credentialsId: '1d374ead-91cb-4607-9c08-88bf1cfa4e28', path: '', url: 'http://172.31.87.82:8080')], contextPath: 'prodapp', war: '**/*.war'
+}
+}
